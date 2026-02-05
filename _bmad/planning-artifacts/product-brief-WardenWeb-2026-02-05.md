@@ -1,8 +1,9 @@
 ---
-stepsCompleted: [1, 2, 3, 4]
+stepsCompleted: [1, 2, 3, 4, 5, 6]
 inputDocuments: ['_bmad/brainstorming/brainstorming-session-2026-02-05.md']
 date: 2026-02-05
 author: Developer
+workflow_completed: true
 ---
 
 # Product Brief: WardenWeb
@@ -179,3 +180,55 @@ Subscribes as Active Player
 - **Visit → Checkout Start**: % of landing page visitors who initiate payment
 - **Checkout Start → Complete**: % of payment initiations that succeed
 - **Coupon → Retained**: % of coupon users still subscribed after trial ends
+
+---
+
+## MVP Scope
+
+### Core Features (V1)
+
+| Feature | Description | Priority |
+|---------|-------------|----------|
+| **Landing Page** | Value proposition, app description, CTA to pricing | Must have |
+| **Pricing + Checkout** | Single page: €7.99/mo or €79.90/yr, Google/Email auth, Stripe payment | Must have |
+| **Account Dashboard** | Email, next payment date, payment history, upgrade to yearly, redeem coupon, cancel | Must have |
+| **Privacy Policy** | Generated via legal template tool | Must have |
+| **Terms of Service** | Generated via legal template tool | Must have |
+
+### Technical Stack (V1)
+
+| Component | Implementation |
+|-----------|----------------|
+| **Auth** | Firebase: Google Sign-In + Email/Password |
+| **Payments** | Stripe: Monthly €7.99, Yearly €79.90, promotion codes |
+| **Webhooks** | `invoice.paid`, `customer.subscription.deleted` |
+| **Database** | Firestore: users/{uid}, coupon redemption tracking |
+| **Analytics** | Firebase Analytics (basic funnel tracking) |
+
+### Out of Scope for MVP
+
+| Feature | Reason | Deferred To |
+|---------|--------|-------------|
+| Discord OAuth | Extra dev work, Google/Email sufficient | V2 |
+| Coupon Admin UI | Stripe dashboard sufficient for beta | V2 |
+| Custom Analytics Dashboard | Firebase Analytics sufficient initially | V2 |
+| Team/Group Billing | Individual subscriptions only for V1 | V2+ |
+| Localization | French tagline only, English UI | V2 |
+
+### MVP Success Criteria
+
+The MVP is successful when:
+- First 20 coaches can subscribe and manage accounts without support intervention
+- Coupon → Paid conversion validates the trial model
+- Checkout abandonment rate identifies friction points
+- No critical payment/auth failures in first 30 days
+
+### Future Vision (V2+)
+
+| Feature | Value |
+|---------|-------|
+| Discord OAuth | Meet users where they are (EVA community lives on Discord) |
+| Coupon Batch Admin UI | Self-service coupon generation for campaigns |
+| Advanced Analytics | Custom dashboard for funnel optimization |
+| Referral System | Coaches invite coaches, earn free months |
+| Team Subscriptions | Coach pays for whole team at discount |
