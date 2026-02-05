@@ -1,5 +1,5 @@
 ---
-stepsCompleted: [1, 2, 3]
+stepsCompleted: [1, 2, 3, 4]
 inputDocuments: ['_bmad/brainstorming/brainstorming-session-2026-02-05.md']
 date: 2026-02-05
 author: Developer
@@ -143,3 +143,39 @@ Decides to analyze own sessions
         ↓
 Subscribes as Active Player
 ```
+
+---
+
+## Success Metrics
+
+### User Success Metrics (Warden App)
+
+| Metric | Target | Why It Matters |
+|--------|--------|----------------|
+| First clip exported | < 5 minutes | Activation — proves value quickly |
+| Reviews per week | 1+ per coach | Engagement — habitual use |
+| Clips per review | 3-5 | Depth — meaningful analysis |
+
+### Business Objectives
+
+| Metric | Target | Timeframe |
+|--------|--------|-----------|
+| Paying coaches | 20 | 3 months |
+| Churn rate | < 15% | Monthly |
+
+### WardenWeb Funnel KPIs
+
+| Stage | Metric | Purpose |
+|-------|--------|---------|
+| **Awareness** | Landing page visits | Measures reach of Discord/word-of-mouth marketing |
+| **Interest** | Pricing page views | Visitors exploring subscription options |
+| **Intent** | Checkout initiated | Users who start payment process |
+| **Drop-off** | Checkout abandonment rate | Users who start but don't complete payment |
+| **Conversion** | Coupon → Paid conversion | Trial users becoming paying subscribers |
+| **Expansion** | Monthly → Yearly upgrade rate | Users committing long-term |
+
+### Key Ratios to Track
+
+- **Visit → Checkout Start**: % of landing page visitors who initiate payment
+- **Checkout Start → Complete**: % of payment initiations that succeed
+- **Coupon → Retained**: % of coupon users still subscribed after trial ends
