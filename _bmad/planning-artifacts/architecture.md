@@ -1,5 +1,5 @@
 ---
-stepsCompleted: [1, 2]
+stepsCompleted: [1, 2, 3]
 inputDocuments:
   - '_bmad/planning-artifacts/prd.md'
   - '_bmad/planning-artifacts/product-brief-WardenWeb-2026-02-05.md'
@@ -60,3 +60,60 @@ _This document builds collaboratively through step-by-step discovery. Sections a
 - **GDPR Compliance**: Affects data storage location, cookie consent flow, account deletion cascade, and privacy policy content.
 - **Error Handling**: Payment failures, auth failures, and webhook processing failures all need distinct handling patterns visible to the user.
 - **Environment Configuration**: Stripe keys, Firebase config, webhook secrets must be managed securely across development and production.
+
+## Starter Template Evaluation
+
+### Primary Technology Domain
+
+Full-stack web application based on project requirements analysis. Next.js provides React frontend + API routes for Stripe webhooks in a single deployment.
+
+### Starter Options Considered
+
+**Option 1: `create-next-app` (Official Next.js CLI)**
+- Next.js 16.1.x (latest stable, Feb 2026)
+- Defaults: TypeScript, Tailwind CSS, ESLint, App Router, Turbopack
+- Add Firebase/Stripe manually
+- Pros: Minimal, standard conventions, zero cost, AI-agent-friendly
+- Cons: No pre-wired integrations
+
+**Option 2: SaaS Boilerplates (Divjoy, Makerkit, supastarter)**
+- Pre-built Firebase + Stripe + auth flows
+- Pros: Faster initial integration setup
+- Cons: Paid ($100-400+), excessive features (team billing, admin, email), opinionated non-standard patterns, harder for AI agents to follow
+
+### Selected Starter: create-next-app (Next.js 16.1.x)
+
+**Rationale for Selection:**
+- Project complexity (low-medium) doesn't justify boilerplate overhead
+- Standard Next.js conventions ensure AI agent consistency
+- Firebase SDK and Stripe SDK are well-documented for manual integration
+- No unnecessary features bloating the codebase
+- Free, always up-to-date, community-supported
+
+**Initialization Command:**
+
+```bash
+npx create-next-app@latest wardenweb --typescript --tailwind --eslint --app --src-dir --turbopack --import-alias "@/*"
+```
+
+**Architectural Decisions Provided by Starter:**
+
+**Language & Runtime:**
+TypeScript (strict mode), Node.js runtime for API routes
+
+**Styling Solution:**
+Tailwind CSS v4 (utility-first, configured out of the box)
+
+**Build Tooling:**
+Turbopack (stable default bundler in Next.js 16), optimized production builds
+
+**Testing Framework:**
+Not included — will be decided in Step 4
+
+**Code Organization:**
+App Router with `src/` directory, `@/*` import alias
+
+**Development Experience:**
+Turbopack hot reload, TypeScript type checking, ESLint linting
+
+**Note:** Project initialization using this command should be the first implementation story.
