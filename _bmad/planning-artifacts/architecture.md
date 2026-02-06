@@ -1,5 +1,5 @@
 ---
-stepsCompleted: [1, 2, 3]
+stepsCompleted: [1, 2, 3, 4]
 inputDocuments:
   - '_bmad/planning-artifacts/prd.md'
   - '_bmad/planning-artifacts/product-brief-WardenWeb-2026-02-05.md'
@@ -117,3 +117,147 @@ App Router with `src/` directory, `@/*` import alias
 Turbopack hot reload, TypeScript type checking, ESLint linting
 
 **Note:** Project initialization using this command should be the first implementation story.
+
+## Core Architectural Decisions
+
+### Decision Priority Analysis
+
+**Critical Decisions (Block Implementation):**
+- Data validation: Zod
+- Auth session management: Server-side session cookies
+- Hosting: Vercel
+- Component library: shadcn/ui
+
+**Important Decisions (Shape Architecture):**
+- Caching strategy: Next.js built-in for static pages
+- State management: React Context for auth
+- Testing: Vitest + Playwright
+- CI/CD: GitHub Actions + Vercel
+
+**Deferred Decisions (Post-MVP):**
+- CDN/edge caching optimization
+- Monitoring/alerting (Vercel Analytics sufficient for MVP)
+- Advanced logging (console logging sufficient for MVP)
+
+### Data Architecture
+
+**Database:** Firestore (Firebase JS SDK v12.9.x)
+- Region: europe-west (GDPR)
+- Collections: `users/{uid}`, `coupon_batches/{batchId}`
+- Security rules: users read/write only own document
+
+**Data Validation:** Zod v3.x
+- Runtime validation on all webhook payloads (security-critical)
+- Shared schemas between client and server
+- TypeScript type inference from schemas
+- Rationale: Webhook payloads from Stripe must be validated at runtime, not just at type level
+
+**Caching Strategy:** Next.js built-in caching only
+- Static pages (landing, pricing, legal): `cacheLife` with revalidation
+- Dashboard: Always fresh reads from Firestore (subscription state changes via webhooks)
+- No external caching layer needed at MVP scale
+
+### Authentication & Security
+
+**Session Management:** Server-side session cookies
+- Firebase Auth `createSessionCookie()` after client-side sign-in
+- HttpOnly, Secure, SameSite=Lax cookies
+- 7-day expiry with activity-based refresh (per PRD: auto-logout after 7 days inactivity)
+- Rationale: PRD requires HttpOnly cookies; server-side sessions enable SSR auth checks
+
+**Route Protection:** Next.js middleware + per-route API checks
+- `middleware.ts`: Validates session cookie, redirects unauthenticated users from `/dashboard/*`
+- API routes: Validate session cookie independently (defense in depth)
+- Public routes: Landing, pricing, legal pages (no auth required)
+
+**Stripe Webhook Security:** Signature verification (per PRD FR24)
+- `stripe.webhooks.constructEvent()` with webhook secret
+- Reject unsigned or invalid payloads before processing
+
+### API & Communication Patterns
+
+**API Routes:** Next.js App Router Route Handlers
+- `/api/webhooks/stripe` — Stripe webhook endpoint
+- `/api/auth/*` — Session management (create/destroy session cookies)
+- `/api/subscription/*` — Subscription actions (upgrade, cancel)
+
+**Webhook Idempotency:** Dual strategy
+- Event ID deduplication: Store processed Stripe event IDs in Firestore, skip duplicates
+- Firestore transactions: Check current state before updating (handles race conditions)
+- Rationale: At-least-once delivery requires both dedup and transactional state updates
+
+**Error Handling:** Three-layer approach
+- API routes: Structured `{error: {code, message}}` JSON responses
+- React error boundaries: Catch unexpected rendering failures
+- User-facing error states: Specific components for payment failed, auth failed, generic error
+- Stripe webhook errors: Log and return 200 to prevent Stripe retries on permanent failures
+
+### Frontend Architecture
+
+**State Management:** React Context (minimal)
+- `AuthContext`: Firebase Auth state (user, loading, error)
+- No global store needed — subscription data fetched per-page from Firestore
+- Rationale: Portal has minimal client state; adding Zustand/React Query is unnecessary
+
+**Component Library:** shadcn/ui
+- Radix UI primitives styled with Tailwind CSS
+- Copy-paste ownership (no npm dependency)
+- Accessible by default (WCAG 2.1 Level A per PRD)
+- Components needed: Button, Card, Dialog, Form, Input, Badge, Alert, Skeleton
+
+**Form Handling:** React Hook Form + Zod
+- Checkout form: Plan selection + coupon code
+- Auth forms: Email/password sign-in/sign-up
+- Zod schemas shared with server-side validation
+
+**Routing Strategy:** Next.js App Router
+- `/` — Landing page (SSR, cached)
+- `/pricing` — Pricing + checkout (client-side interactivity)
+- `/dashboard` — Account dashboard (protected, fresh data)
+- `/privacy` — Privacy policy (static)
+- `/terms` — Terms of service (static)
+
+### Infrastructure & Deployment
+
+**Hosting:** Vercel
+- Native Next.js support, zero-config deployment
+- API routes → serverless functions (auto-scaled)
+- Edge network for static assets
+- Preview deployments on PRs
+- Rationale: Best-in-class Next.js hosting, free tier sufficient for MVP
+
+**Testing:** Vitest 4.x + Playwright
+- Vitest: Unit tests for utilities, Zod schemas, webhook handlers
+- React Testing Library: Component tests
+- Playwright: E2E tests for checkout flow, auth flow, dashboard actions
+- Rationale: Vitest is Next.js recommended; Playwright covers critical payment flows
+
+**CI/CD:** GitHub Actions + Vercel
+- GitHub Actions: Run linting, type checking, unit tests, E2E tests on PR
+- Vercel: Automatic preview deployments on PR, production deploy on main merge
+- Rationale: Separation of concerns — GH Actions validates code quality, Vercel handles deployment
+
+**Environment Management:**
+- `.env.local` — Local development secrets
+- `.env.example` — Template with placeholder values (committed)
+- Vercel Environment Variables — Production/preview secrets
+- Required vars: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_FIREBASE_*` config values
+
+### Decision Impact Analysis
+
+**Implementation Sequence:**
+1. Project initialization (`create-next-app`)
+2. Firebase Auth + session cookie setup
+3. Firestore data layer + security rules
+4. Stripe integration + webhook endpoint
+5. UI components (shadcn/ui setup)
+6. Page implementations (landing → pricing → dashboard)
+7. Testing setup (Vitest + Playwright)
+8. CI/CD pipeline (GitHub Actions)
+9. Vercel deployment
+
+**Cross-Component Dependencies:**
+- Auth decisions affect: middleware, API routes, dashboard, checkout
+- Stripe decisions affect: webhook handler, dashboard state display, checkout flow
+- Zod schemas affect: webhook validation, form validation, Firestore writes
+- shadcn/ui affects: all page implementations
