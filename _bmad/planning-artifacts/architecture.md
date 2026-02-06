@@ -1,5 +1,5 @@
 ---
-stepsCompleted: [1, 2, 3, 4]
+stepsCompleted: [1, 2, 3, 4, 5]
 inputDocuments:
   - '_bmad/planning-artifacts/prd.md'
   - '_bmad/planning-artifacts/product-brief-WardenWeb-2026-02-05.md'
@@ -261,3 +261,126 @@ Turbopack hot reload, TypeScript type checking, ESLint linting
 - Stripe decisions affect: webhook handler, dashboard state display, checkout flow
 - Zod schemas affect: webhook validation, form validation, Firestore writes
 - shadcn/ui affects: all page implementations
+
+## Implementation Patterns & Consistency Rules
+
+### Pattern Categories Defined
+
+**Critical Conflict Points Identified:** 5 categories where AI agents could make different choices — naming, structure, formats, communication, and process patterns.
+
+### Naming Patterns
+
+**Firestore Naming Conventions:**
+- Collection names: `snake_case` plural → `users`, `coupon_batches`
+- Document fields: `snake_case` → `current_period_end`, `redeemed_batches`
+- Rationale: Matches Stripe webhook field naming (Stripe uses snake_case), avoids constant conversion
+
+**API Naming Conventions:**
+- Route handlers: kebab-case directories → `/api/webhooks/stripe`, `/api/auth/session`
+- Query parameters: `camelCase` → `?batchId=abc`
+- JSON response fields: `camelCase` → `{currentPlan, nextPaymentDate}`
+
+**Code Naming Conventions:**
+- Components: `PascalCase` files → `PricingCard.tsx`, `DashboardLayout.tsx`
+- Utilities/lib: `camelCase` files → `stripeClient.ts`, `firebaseAdmin.ts`
+- Hooks: `camelCase` with `use` prefix → `useAuth.ts`, `useSubscription.ts`
+- Types: `PascalCase` → `User`, `Subscription`, `WebhookEvent`
+- Constants: `SCREAMING_SNAKE_CASE` → `STRIPE_PLANS`, `AUTH_COOKIE_NAME`
+- CSS classes: Tailwind utilities only (no custom CSS class names)
+
+### Structure Patterns
+
+**Project Organization:**
+- Components organized by feature, not by type
+- `src/components/ui/` for shadcn/ui base components
+- `src/components/auth/` for auth-specific components
+- `src/components/checkout/` for checkout components
+- `src/components/dashboard/` for dashboard components
+- `src/components/layout/` for shared layout (Header, Footer, CookieBanner)
+
+**File Structure Patterns:**
+- Tests co-located next to source: `src/lib/__tests__/stripe.test.ts`
+- E2E tests in top-level `e2e/` directory
+- Lib organized by service: `src/lib/firebase/`, `src/lib/stripe/`, `src/lib/schemas/`
+
+### Format Patterns
+
+**API Response Formats:**
+```typescript
+// Success
+{ data: { subscription: {...} } }
+
+// Error
+{ error: { code: "SUBSCRIPTION_NOT_FOUND", message: "No active subscription" } }
+```
+
+**Data Exchange Formats:**
+- Firestore stores `snake_case` (matches Stripe webhook payloads)
+- Frontend uses `camelCase` (TypeScript convention)
+- Conversion happens in data layer (`src/lib/firebase/`) using Zod `.transform()`
+- Dates in Firestore: `Timestamp` objects
+- Dates from Stripe: Unix timestamps (seconds)
+- Dates in JSON responses: ISO 8601 strings
+- Dates in UI: `Intl.DateTimeFormat` (no date library needed)
+
+### Communication Patterns
+
+**Auth Flow Pattern:**
+1. Client: Firebase `signInWithPopup()` or `signInWithEmailAndPassword()`
+2. Client gets ID token: `user.getIdToken()`
+3. POST to `/api/auth/session` with ID token
+4. Server creates session cookie via `createSessionCookie()`, returns success
+5. Client redirects to dashboard
+
+**Stripe Webhook Event Flow:**
+1. Stripe POSTs to `/api/webhooks/stripe`
+2. Verify signature → parse event
+3. Check event ID dedup in Firestore
+4. Route by event type (`invoice.paid`, `customer.subscription.deleted`, `invoice.payment_failed`)
+5. Firestore transaction to update `users/{uid}` subscription fields
+6. Return 200
+
+**Loading State Pattern:**
+- Component-level: `isLoading` boolean + Skeleton component from shadcn/ui
+- Page-level: Next.js `loading.tsx` files
+- Auth loading: `AuthContext` provides `{user, loading, error}`
+
+### Process Patterns
+
+**Error Handling Patterns:**
+
+| Layer | Pattern |
+|-------|---------|
+| API routes | Try/catch → structured JSON error response |
+| Webhook handler | Try/catch → log error, return 200 (prevent Stripe retries) |
+| React components | Error boundaries around feature sections |
+| Forms | React Hook Form validation errors → inline display |
+| Auth | Redirect to sign-in on 401, toast on other errors |
+
+**Environment Variable Access:**
+- Server-only: `process.env.STRIPE_SECRET_KEY` (no `NEXT_PUBLIC_` prefix)
+- Client-safe: `process.env.NEXT_PUBLIC_FIREBASE_API_KEY`
+- Rule: Server secrets must never appear in client bundles
+
+**Import Order Convention:**
+1. React/Next.js imports
+2. Third-party libraries
+3. `@/` project imports
+4. Relative imports
+5. Type-only imports last
+
+### Enforcement Guidelines
+
+**All AI Agents MUST:**
+- Follow naming conventions exactly (snake_case in Firestore, camelCase in code, PascalCase for components)
+- Use Zod schemas for all data flowing between boundaries (webhook → server, server → client)
+- Place components in feature directories, not flat in `components/`
+- Use the structured API response format for all route handlers
+- Never import server-only modules in client components
+
+**Anti-Patterns:**
+- Mixing `snake_case` and `camelCase` in Firestore documents
+- Using `any` type instead of Zod-inferred types
+- Placing API keys or secrets in client-accessible files
+- Creating global state for data that should be fetched per-page
+- Importing `firebase-admin` in client components
