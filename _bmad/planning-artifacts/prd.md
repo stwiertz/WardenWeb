@@ -1,5 +1,5 @@
 ---
-stepsCompleted: ['step-01-init', 'step-02-discovery', 'step-03-success', 'step-04-journeys', 'step-05-domain', 'step-06-innovation', 'step-07-project-type', 'step-08-scoping', 'step-09-functional', 'step-10-nonfunctional']
+stepsCompleted: ['step-01-init', 'step-02-discovery', 'step-03-success', 'step-04-journeys', 'step-05-domain', 'step-06-innovation', 'step-07-project-type', 'step-08-scoping', 'step-09-functional', 'step-10-nonfunctional', 'step-11-polish']
 inputDocuments:
   - '_bmad/planning-artifacts/product-brief-WardenWeb-2026-02-05.md'
   - '_bmad/brainstorming/brainstorming-session-2026-02-05.md'
@@ -22,6 +22,36 @@ author: 'Developer'
 
 **Author:** Developer
 **Date:** 2026-02-05
+
+## Executive Summary
+
+**WardenWeb** est le portail de subscription pour l'application mobile **Warden** — un outil de video review spécialisé pour les coaches EVA After-h.
+
+### Vision
+
+Modèle "Reader App" permettant aux coaches de s'abonner via web (bypass app store fees) tout en offrant une présence professionnelle pour le marketing Discord et le bouche-à-oreille.
+
+### Differentiator
+
+| Aspect | WardenWeb |
+|--------|-----------|
+| **Business Model** | Web subscription → bypass 30% app store fees |
+| **Target** | Coaches EVA After-h (niche, word-of-mouth) |
+| **UX** | Single-page checkout, minimal friction |
+| **Trial Model** | Coupon-based free periods with card capture upfront |
+
+### Target Users
+
+- **Primary:** Coaches EVA After-h (Thomas, 26) — reviews sessions, shares clips
+- **Secondary:** Active Players — self-analyze gameplay, individual subscriptions
+
+### Key Metrics
+
+| Metric | Target | Timeframe |
+|--------|--------|-----------|
+| Paying coaches | 20 | 3 months |
+| Coupon → Retained | ≥ 10% | After trial |
+| Monthly churn | < 15% | Ongoing |
 
 ## Success Criteria
 
@@ -285,11 +315,7 @@ Lucas devient un Active Player. Potentiel futur coach pour son propre groupe.
 
 ### Performance Targets
 
-| Metric | Target | Page |
-|--------|--------|------|
-| LCP | < 2.5s | Landing |
-| FID | < 100ms | All |
-| CLS | < 0.1 | All |
+*See Non-Functional Requirements → Performance for detailed targets.*
 
 ### SEO Strategy
 
