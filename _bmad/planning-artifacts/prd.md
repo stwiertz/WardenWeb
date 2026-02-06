@@ -1,5 +1,5 @@
 ---
-stepsCompleted: ['step-01-init', 'step-02-discovery', 'step-03-success', 'step-04-journeys', 'step-05-domain', 'step-06-innovation', 'step-07-project-type', 'step-08-scoping']
+stepsCompleted: ['step-01-init', 'step-02-discovery', 'step-03-success', 'step-04-journeys', 'step-05-domain', 'step-06-innovation', 'step-07-project-type', 'step-08-scoping', 'step-09-functional']
 inputDocuments:
   - '_bmad/planning-artifacts/product-brief-WardenWeb-2026-02-05.md'
   - '_bmad/brainstorming/brainstorming-session-2026-02-05.md'
@@ -385,3 +385,63 @@ Lucas devient un Active Player. Potentiel futur coach pour son propre groupe.
 - Referral System
 - Team Subscriptions
 - Full French localization
+
+## Functional Requirements
+
+### Authentication & Identity
+
+- **FR1:** User can sign in using Google account
+- **FR2:** User can sign in using email and password
+- **FR3:** User can sign out from their account
+- **FR4:** User can create a new account during checkout flow
+
+### Landing & Discovery
+
+- **FR5:** Visitor can view landing page with Warden app value proposition
+- **FR6:** Visitor can navigate from landing page to pricing page
+- **FR7:** Visitor can view app download links (iOS/Android)
+
+### Subscription & Checkout
+
+- **FR8:** User can view available subscription plans (monthly €7.99, yearly €79.90)
+- **FR9:** User can subscribe to monthly plan via Stripe checkout
+- **FR10:** User can subscribe to yearly plan via Stripe checkout
+- **FR11:** User can apply a coupon code during checkout
+- **FR12:** User can see deferred billing date when coupon is applied
+
+### Account Dashboard
+
+- **FR13:** Subscriber can view their account email
+- **FR14:** Subscriber can view their current subscription plan
+- **FR15:** Subscriber can view subscription status (active, past_due, canceled)
+- **FR16:** Subscriber can view next payment date
+- **FR17:** Subscriber can view payment history
+- **FR18:** Subscriber can upgrade from monthly to yearly plan
+- **FR19:** Subscriber can cancel their subscription
+- **FR20:** Subscriber can access Stripe Customer Portal to update payment method
+
+### Payment & Billing
+
+- **FR21:** System processes `invoice.paid` webhook to activate/renew subscription
+- **FR22:** System processes `customer.subscription.deleted` webhook to deactivate subscription
+- **FR23:** System processes `invoice.payment_failed` webhook to mark subscription as past_due
+- **FR24:** System verifies Stripe webhook signatures before processing
+- **FR25:** Dashboard displays payment failure warning when status is past_due
+
+### Legal & Compliance
+
+- **FR26:** Visitor can view Privacy Policy page
+- **FR27:** Visitor can view Terms of Service page
+- **FR28:** Visitor can accept or reject analytics cookies via banner
+- **FR29:** System loads Firebase Analytics only after cookie consent
+
+### Account Deletion (MVP Contingency)
+
+- **FR30:** User can request account deletion via support email
+- **FR31:** Support can delete user account (Stripe cancel + Firestore delete + Auth delete)
+
+### Data Security
+
+- **FR32:** Firestore rules restrict users to read/write only their own data
+- **FR33:** API routes validate authentication before processing requests
+- **FR34:** Stripe API keys are stored as environment variables (not in client bundle)
