@@ -1,5 +1,5 @@
 ---
-stepsCompleted: [1, 2, 3, 4, 5]
+stepsCompleted: [1, 2, 3, 4, 5, 6]
 inputDocuments:
   - '_bmad/planning-artifacts/prd.md'
   - '_bmad/planning-artifacts/product-brief-WardenWeb-2026-02-05.md'
@@ -384,3 +384,185 @@ Turbopack hot reload, TypeScript type checking, ESLint linting
 - Placing API keys or secrets in client-accessible files
 - Creating global state for data that should be fetched per-page
 - Importing `firebase-admin` in client components
+
+## Project Structure & Boundaries
+
+### Complete Project Directory Structure
+
+```
+wardenweb/
+├── .github/
+│   └── workflows/
+│       └── ci.yml                    # GitHub Actions: lint, typecheck, test
+├── e2e/
+│   ├── checkout.spec.ts              # E2E: subscription checkout flow
+│   ├── auth.spec.ts                  # E2E: sign-in/sign-out flows
+│   └── dashboard.spec.ts             # E2E: dashboard actions (upgrade, cancel)
+├── public/
+│   ├── favicon.ico
+│   └── images/                       # Static images (logo, app screenshots)
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx                # Root layout (HTML head, fonts, providers)
+│   │   ├── page.tsx                  # Landing page (/)
+│   │   ├── loading.tsx               # Root loading state
+│   │   ├── error.tsx                 # Root error boundary
+│   │   ├── globals.css               # Tailwind base + custom properties
+│   │   ├── pricing/
+│   │   │   └── page.tsx              # Pricing + checkout (/pricing)
+│   │   ├── dashboard/
+│   │   │   ├── layout.tsx            # Dashboard layout (auth-protected)
+│   │   │   ├── page.tsx              # Account dashboard (/dashboard)
+│   │   │   └── loading.tsx           # Dashboard loading skeleton
+│   │   ├── privacy/
+│   │   │   └── page.tsx              # Privacy policy (/privacy)
+│   │   ├── terms/
+│   │   │   └── page.tsx              # Terms of service (/terms)
+│   │   └── api/
+│   │       ├── auth/
+│   │       │   └── session/
+│   │       │       └── route.ts      # POST: create session, DELETE: destroy
+│   │       ├── webhooks/
+│   │       │   └── stripe/
+│   │       │       └── route.ts      # POST: Stripe webhook handler
+│   │       └── subscription/
+│   │           ├── upgrade/
+│   │           │   └── route.ts      # POST: upgrade to yearly
+│   │           └── cancel/
+│   │               └── route.ts      # POST: cancel subscription
+│   ├── components/
+│   │   ├── ui/                       # shadcn/ui components
+│   │   │   ├── button.tsx
+│   │   │   ├── card.tsx
+│   │   │   ├── dialog.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── badge.tsx
+│   │   │   ├── alert.tsx
+│   │   │   └── skeleton.tsx
+│   │   ├── auth/
+│   │   │   ├── SignInForm.tsx         # Email/password sign-in
+│   │   │   ├── GoogleSignInButton.tsx # Google OAuth button
+│   │   │   └── AuthGuard.tsx         # Client-side auth check wrapper
+│   │   ├── checkout/
+│   │   │   ├── PlanSelector.tsx       # Monthly/yearly plan cards
+│   │   │   ├── CouponInput.tsx        # Coupon code entry + validation
+│   │   │   └── CheckoutForm.tsx       # Stripe Elements wrapper
+│   │   ├── dashboard/
+│   │   │   ├── SubscriptionCard.tsx   # Current plan + status display
+│   │   │   ├── PaymentHistory.tsx     # Past invoices list
+│   │   │   ├── UpgradeButton.tsx      # Upgrade to yearly CTA
+│   │   │   ├── CancelDialog.tsx       # Cancel confirmation dialog
+│   │   │   └── PaymentWarning.tsx     # Past-due alert banner
+│   │   └── layout/
+│   │       ├── Header.tsx             # Navigation header
+│   │       ├── Footer.tsx             # Footer with legal links
+│   │       └── CookieBanner.tsx       # GDPR cookie consent
+│   ├── lib/
+│   │   ├── firebase/
+│   │   │   ├── client.ts             # Firebase client SDK init
+│   │   │   ├── admin.ts              # Firebase Admin SDK init (server-only)
+│   │   │   ├── auth.ts               # Auth helpers (session cookie, token verify)
+│   │   │   └── firestore.ts          # Firestore read/write helpers
+│   │   ├── stripe/
+│   │   │   ├── client.ts             # Stripe.js client init
+│   │   │   ├── server.ts             # Stripe Node SDK init (server-only)
+│   │   │   └── webhooks.ts           # Webhook handler + event routing
+│   │   ├── schemas/
+│   │   │   ├── user.ts               # User document Zod schema
+│   │   │   ├── subscription.ts       # Subscription Zod schema
+│   │   │   └── webhook-events.ts     # Stripe webhook payload schemas
+│   │   └── utils.ts                  # Generic utilities (date formatting, etc.)
+│   ├── contexts/
+│   │   └── AuthContext.tsx            # Firebase Auth React context + provider
+│   ├── hooks/
+│   │   ├── useAuth.ts                # Auth state hook (wraps AuthContext)
+│   │   └── useSubscription.ts        # Fetch subscription data from Firestore
+│   ├── types/
+│   │   └── index.ts                  # Shared TypeScript types (Zod-inferred)
+│   └── middleware.ts                  # Next.js middleware (session cookie validation)
+├── .env.example                       # Environment variable template
+├── .env.local                         # Local dev secrets (gitignored)
+├── .gitignore
+├── components.json                    # shadcn/ui configuration
+├── eslint.config.mjs                  # ESLint configuration
+├── next.config.ts                     # Next.js configuration
+├── package.json
+├── playwright.config.ts               # Playwright E2E configuration
+├── postcss.config.mjs                 # PostCSS (Tailwind)
+├── tailwind.config.ts                 # Tailwind CSS configuration
+├── tsconfig.json                      # TypeScript configuration
+└── vitest.config.ts                   # Vitest unit test configuration
+```
+
+### Architectural Boundaries
+
+**API Boundaries:**
+- `/api/webhooks/stripe` — Stripe-only (no auth required, signature verification instead)
+- `/api/auth/*` — Public (receives Firebase ID token, returns session cookie)
+- `/api/subscription/*` — Protected (requires valid session cookie)
+
+**Component Boundaries:**
+- `components/ui/` — Pure presentational, no business logic, no data fetching
+- `components/{feature}/` — Feature-specific, may use hooks for data
+- `components/layout/` — Shared across pages, may access auth context
+
+**Service Boundaries:**
+- `lib/firebase/client.ts` — Client-safe imports only (browser)
+- `lib/firebase/admin.ts` — Server-only (API routes, middleware)
+- `lib/stripe/client.ts` — Client-safe (Stripe.js, publishable key)
+- `lib/stripe/server.ts` — Server-only (Stripe Node SDK, secret key)
+
+**Data Boundaries:**
+- Firestore `users/{uid}` — Read via hooks (client) or admin SDK (server)
+- Firestore `coupon_batches/{batchId}` — Read-only from client, write from Stripe dashboard
+- Stripe API — Server-only access via `lib/stripe/server.ts`
+
+### Requirements to Structure Mapping
+
+**FR Category → Directory Mapping:**
+
+| FR Category | Primary Location |
+|-------------|-----------------|
+| Auth (FR1-4) | `components/auth/`, `lib/firebase/auth.ts`, `api/auth/` |
+| Landing (FR5-7) | `app/page.tsx`, `components/layout/` |
+| Checkout (FR8-12) | `app/pricing/`, `components/checkout/`, `lib/stripe/` |
+| Dashboard (FR13-20) | `app/dashboard/`, `components/dashboard/` |
+| Webhooks (FR21-25) | `api/webhooks/stripe/`, `lib/stripe/webhooks.ts` |
+| Legal (FR26-29) | `app/privacy/`, `app/terms/`, `components/layout/CookieBanner.tsx` |
+| Account Deletion (FR30-31) | Manual via support (no code for MVP) |
+| Security (FR32-34) | `middleware.ts`, `lib/firebase/admin.ts`, `.env.*` |
+
+**Cross-Cutting Concerns:**
+
+| Concern | Location |
+|---------|----------|
+| Auth state | `contexts/AuthContext.tsx`, `hooks/useAuth.ts`, `middleware.ts` |
+| Stripe-Firestore sync | `lib/stripe/webhooks.ts`, `lib/firebase/firestore.ts` |
+| Data validation | `lib/schemas/*.ts` |
+| Error handling | `app/error.tsx`, API route try/catch, `components/dashboard/PaymentWarning.tsx` |
+| Environment config | `.env.local`, `.env.example`, Vercel env vars |
+
+### Integration Points
+
+**Internal Communication:**
+- Pages → Hooks → Firestore (client reads)
+- Pages → API routes → Stripe SDK (server actions)
+- Middleware → Firebase Admin → session validation
+
+**External Integrations:**
+- Firebase Auth: `lib/firebase/client.ts` (browser) + `lib/firebase/admin.ts` (server)
+- Stripe: `lib/stripe/client.ts` (Stripe.js) + `lib/stripe/server.ts` (Node SDK)
+- Firebase Analytics: Loaded conditionally after cookie consent in root layout
+
+**Data Flow:**
+```
+User Browser
+    ↓ (sign-in)
+Firebase Auth SDK → ID Token → /api/auth/session → Session Cookie
+    ↓ (checkout)
+Stripe.js → Stripe API → Subscription Created
+    ↓ (webhook)
+Stripe → /api/webhooks/stripe → Verify Signature → Firestore Update
+    ↓ (dashboard)
+Firestore Read → components/dashboard/* → Display subscription state
+```
