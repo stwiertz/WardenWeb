@@ -1,5 +1,5 @@
 ---
-stepsCompleted: ['step-01-init', 'step-02-discovery', 'step-03-success', 'step-04-journeys', 'step-05-domain', 'step-06-innovation']
+stepsCompleted: ['step-01-init', 'step-02-discovery', 'step-03-success', 'step-04-journeys', 'step-05-domain', 'step-06-innovation', 'step-07-project-type']
 inputDocuments:
   - '_bmad/planning-artifacts/product-brief-WardenWeb-2026-02-05.md'
   - '_bmad/brainstorming/brainstorming-session-2026-02-05.md'
@@ -250,3 +250,73 @@ Lucas devient un Active Player. Potentiel futur coach pour son propre groupe.
 | **Privacy Policy** | Données collectées, finalités, droits utilisateur, contact DPO |
 | **Terms of Service** | Conditions d'abonnement, annulation, limitations |
 | **Cookie Banner** | Choix accepter/refuser analytics |
+
+## Web App Specific Requirements
+
+### Architecture
+
+| Aspect | Décision |
+|--------|----------|
+| **Framework** | Next.js (React + API routes) |
+| **Rendering** | SPA avec SSR optionnel pour landing (SEO) |
+| **Hosting** | Vercel / Firebase Hosting |
+| **API** | Next.js API routes pour webhooks Stripe |
+
+### Responsive Design
+
+| Breakpoint | Target |
+|------------|--------|
+| **Mobile** | 320px - 768px (prioritaire) |
+| **Tablet** | 768px - 1024px |
+| **Desktop** | 1024px+ |
+
+**Approche:** Mobile-first, progressive enhancement vers desktop.
+
+### Browser Support
+
+| Browser | Version |
+|---------|---------|
+| Chrome | Last 2 versions |
+| Firefox | Last 2 versions |
+| Safari | Last 2 versions |
+| Edge | Last 2 versions |
+
+**Note:** Pas de support IE11.
+
+### Performance Targets
+
+| Metric | Target | Page |
+|--------|--------|------|
+| LCP | < 2.5s | Landing |
+| FID | < 100ms | All |
+| CLS | < 0.1 | All |
+
+### SEO Strategy
+
+| Page | SEO Priority |
+|------|--------------|
+| Landing | Medium (meta tags, OG) |
+| Pricing | Low (indexable mais pas prioritaire) |
+| Dashboard | None (derrière auth, noindex) |
+| Legal pages | Low (indexable) |
+
+### Real-Time Requirements
+
+| Scenario | Approach |
+|----------|----------|
+| Post-payment sync | Stripe webhook → Firestore update → App reads on next load |
+| Dashboard refresh | Page reload ou polling léger (pas de WebSocket) |
+
+**Pas de WebSocket requis** — la DB reste la source de vérité, rafraîchie par webhooks.
+
+### Accessibility
+
+| Standard | Level |
+|----------|-------|
+| WCAG | 2.1 Level A |
+
+**Inclus:**
+- Contrastes suffisants
+- Labels sur les inputs
+- Navigation clavier
+- Focus visible
