@@ -1,5 +1,5 @@
 ---
-stepsCompleted: ['step-01-init', 'step-02-discovery', 'step-03-success', 'step-04-journeys', 'step-05-domain', 'step-06-innovation', 'step-07-project-type']
+stepsCompleted: ['step-01-init', 'step-02-discovery', 'step-03-success', 'step-04-journeys', 'step-05-domain', 'step-06-innovation', 'step-07-project-type', 'step-08-scoping']
 inputDocuments:
   - '_bmad/planning-artifacts/product-brief-WardenWeb-2026-02-05.md'
   - '_bmad/brainstorming/brainstorming-session-2026-02-05.md'
@@ -320,3 +320,68 @@ Lucas devient un Active Player. Potentiel futur coach pour son propre groupe.
 - Labels sur les inputs
 - Navigation clavier
 - Focus visible
+
+## Project Scoping & Phased Development
+
+### MVP Strategy & Philosophy
+
+**MVP Approach:** Revenue MVP — Valider que les coaches paient pour Warden via web checkout.
+
+**Core Hypothesis:** Les coaches EVA préfèrent payer via web (bypass app store fees) plutôt que via in-app purchase.
+
+### MVP Feature Set (Phase 1)
+
+**Core User Journeys Supported:**
+- J1: Coach Discovery & Subscription ✓
+- J3: Payment Failure Recovery ✓
+- J4: Cancellation Flow ✓
+- J5: Passive → Active Conversion ✓
+
+**Must-Have Capabilities:**
+
+| Capability | Justification |
+|------------|---------------|
+| Landing Page | Discovery & value proposition |
+| Pricing + Checkout | Revenue generation |
+| Account Dashboard | Subscription visibility |
+| Upgrade to Yearly | Revenue optimization |
+| Cancel subscription | Legal requirement, trust |
+| Payment status display | Payment failure recovery |
+| Stripe Customer Portal link | Card update (Stripe handles UI) |
+| Privacy Policy / ToS | Legal requirement |
+| Cookie Banner | GDPR compliance |
+
+**Deferred from MVP (Contingency):**
+
+| Feature | Fallback |
+|---------|----------|
+| Account deletion button | Manual via support (email request) |
+| Churn survey | Skip for MVP |
+| Coupon redemption in dashboard | Only at checkout for MVP |
+
+### Technical Risk Mitigation
+
+| Risk | Mitigation |
+|------|------------|
+| **Stripe webhook sync** | Idempotent handlers, webhook signature verification, retry logic |
+| **Data security (vibe coding risk)** | Firestore security rules, server-side validation, no client-side secrets |
+| **Auth token leakage** | Firebase Auth best practices, secure cookie handling |
+
+**Security Emphasis:**
+- Firestore rules: users can only read/write their own data
+- Stripe webhook endpoint: verify signature before processing
+- No API keys in client bundle
+- Environment variables for secrets
+
+### Post-MVP Features
+
+**Phase 2 (Growth):**
+- Discord OAuth
+- Coupon Admin UI
+- Account deletion button
+- Advanced Analytics dashboard
+
+**Phase 3 (Vision):**
+- Referral System
+- Team Subscriptions
+- Full French localization
