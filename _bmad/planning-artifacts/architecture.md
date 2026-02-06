@@ -369,6 +369,35 @@ Turbopack hot reload, TypeScript type checking, ESLint linting
 4. Relative imports
 5. Type-only imports last
 
+**Code Formatting:** Prettier
+- `prettier` + `prettier-plugin-tailwindcss` (auto-sorts Tailwind classes)
+- Config in `.prettierrc` at project root
+- Integrated with ESLint via `eslint-config-prettier`
+- Run on save (editor) and in CI (GitHub Actions)
+- Settings: single quotes, no semicolons, 2-space indent, trailing commas, 100 char print width
+
+```json
+{
+  "semi": false,
+  "singleQuote": true,
+  "trailingComma": "all",
+  "printWidth": 100,
+  "tabWidth": 2,
+  "plugins": ["prettier-plugin-tailwindcss"]
+}
+```
+
+**Commit Convention:** Conventional Commits
+- Format: `type(scope): description`
+- Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
+- Scopes: `auth`, `checkout`, `dashboard`, `webhooks`, `landing`, `legal`, `infra`
+- Examples:
+  - `feat(checkout): add coupon code input with validation`
+  - `fix(webhooks): handle duplicate Stripe event IDs`
+  - `chore(infra): configure GitHub Actions CI pipeline`
+- Enforced via `commitlint` + `husky` pre-commit hook
+- Breaking changes: `feat(auth)!: switch to server-side session cookies`
+
 ### Enforcement Guidelines
 
 **All AI Agents MUST:**
@@ -377,6 +406,8 @@ Turbopack hot reload, TypeScript type checking, ESLint linting
 - Place components in feature directories, not flat in `components/`
 - Use the structured API response format for all route handlers
 - Never import server-only modules in client components
+- Format code with Prettier before committing
+- Use Conventional Commits format for all commit messages
 
 **Anti-Patterns:**
 - Mixing `snake_case` and `camelCase` in Firestore documents
@@ -483,6 +514,10 @@ wardenweb/
 ├── .env.example                       # Environment variable template
 ├── .env.local                         # Local dev secrets (gitignored)
 ├── .gitignore
+├── .husky/
+│   └── commit-msg                     # commitlint hook
+├── .prettierrc                        # Prettier configuration
+├── commitlint.config.ts               # Conventional Commits config
 ├── components.json                    # shadcn/ui configuration
 ├── eslint.config.mjs                  # ESLint configuration
 ├── next.config.ts                     # Next.js configuration
