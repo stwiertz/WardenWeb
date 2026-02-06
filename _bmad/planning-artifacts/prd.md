@@ -1,5 +1,5 @@
 ---
-stepsCompleted: ['step-01-init', 'step-02-discovery', 'step-03-success', 'step-04-journeys', 'step-05-domain']
+stepsCompleted: ['step-01-init', 'step-02-discovery', 'step-03-success', 'step-04-journeys', 'step-05-domain', 'step-06-innovation']
 inputDocuments:
   - '_bmad/planning-artifacts/product-brief-WardenWeb-2026-02-05.md'
   - '_bmad/brainstorming/brainstorming-session-2026-02-05.md'
