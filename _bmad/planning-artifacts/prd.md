@@ -1,5 +1,5 @@
 ---
-stepsCompleted: ['step-01-init', 'step-02-discovery', 'step-03-success', 'step-04-journeys', 'step-05-domain', 'step-06-innovation', 'step-07-project-type', 'step-08-scoping', 'step-09-functional']
+stepsCompleted: ['step-01-init', 'step-02-discovery', 'step-03-success', 'step-04-journeys', 'step-05-domain', 'step-06-innovation', 'step-07-project-type', 'step-08-scoping', 'step-09-functional', 'step-10-nonfunctional']
 inputDocuments:
   - '_bmad/planning-artifacts/product-brief-WardenWeb-2026-02-05.md'
   - '_bmad/brainstorming/brainstorming-session-2026-02-05.md'
@@ -445,3 +445,45 @@ Lucas devient un Active Player. Potentiel futur coach pour son propre groupe.
 - **FR32:** Firestore rules restrict users to read/write only their own data
 - **FR33:** API routes validate authentication before processing requests
 - **FR34:** Stripe API keys are stored as environment variables (not in client bundle)
+
+## Non-Functional Requirements
+
+### Performance
+
+| Metric | Target | Context |
+|--------|--------|---------|
+| Page Load (LCP) | < 2.5s | Landing, Pricing |
+| Interaction (FID) | < 100ms | All pages |
+| Visual Stability (CLS) | < 0.1 | All pages |
+| Checkout completion | < 30s | End-to-end from plan selection to confirmation |
+| Dashboard load | < 2s | After authentication |
+
+### Security
+
+| Requirement | Specification |
+|-------------|---------------|
+| **Data in transit** | HTTPS enforced on all endpoints |
+| **Data at rest** | Firestore default encryption |
+| **Authentication tokens** | Firebase Auth managed, HttpOnly cookies |
+| **Stripe webhooks** | Signature verification required |
+| **API keys** | Server-side only, environment variables |
+| **Firestore rules** | Users read/write only `users/{uid}` |
+| **PCI compliance** | Delegated to Stripe (no card data stored) |
+| **Session management** | Auto-logout after 7 days inactivity |
+
+### Integration
+
+| System | Reliability Requirement |
+|--------|------------------------|
+| **Stripe API** | Handle transient failures with retry (3 attempts) |
+| **Stripe Webhooks** | Idempotent processing, 200 response within 5s |
+| **Firebase Auth** | Graceful fallback UI if service unavailable |
+| **Firestore** | Offline-first not required (web app) |
+
+### Data Integrity
+
+| Requirement | Specification |
+|-------------|---------------|
+| **Subscription sync** | Firestore matches Stripe within 30s of webhook |
+| **Webhook processing** | At-least-once delivery with idempotency |
+| **Audit trail** | Stripe dashboard as source of truth for payments |
