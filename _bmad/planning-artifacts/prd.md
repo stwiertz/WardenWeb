@@ -1,5 +1,5 @@
 ---
-stepsCompleted: ['step-01-init', 'step-02-discovery', 'step-03-success', 'step-04-journeys']
+stepsCompleted: ['step-01-init', 'step-02-discovery', 'step-03-success', 'step-04-journeys', 'step-05-domain']
 inputDocuments:
   - '_bmad/planning-artifacts/product-brief-WardenWeb-2026-02-05.md'
   - '_bmad/brainstorming/brainstorming-session-2026-02-05.md'
@@ -212,3 +212,41 @@ Lucas devient un Active Player. Potentiel futur coach pour son propre groupe.
 | Subscription status display | J3, J4 |
 | Cancel flow | J4 |
 | Webhook handling | J3, J4 |
+
+## Domain-Specific Requirements
+
+### Data Privacy (GDPR)
+
+| Requirement | Implementation |
+|-------------|----------------|
+| **Base légale** | Contrat (subscription service) |
+| **Données collectées** | Email, nom (via Google), historique abonnement, coupons utilisés |
+| **Données paiement** | Gérées par Stripe (PCI-DSS compliant) — non stockées |
+| **Droit à l'effacement** | Bouton "Supprimer mon compte" dans dashboard |
+| **Localisation** | Firestore région `europe-west` |
+
+### Account Deletion Flow
+
+**Trigger:** Bouton "Supprimer mon compte" dans le dashboard
+
+**Actions:**
+1. Annuler subscription Stripe (si active)
+2. Supprimer document `users/{uid}` dans Firestore
+3. Supprimer compte Firebase Auth
+4. Confirmation visuelle + déconnexion
+
+### Analytics & Cookies
+
+| Élément | Décision |
+|---------|----------|
+| Firebase Analytics | Activé (gratuit, events standard) |
+| Bandeau cookies | Requis (Firebase Analytics utilise des cookies) |
+| Consentement | Charger Analytics uniquement après acceptation |
+
+### Legal Pages
+
+| Page | Contenu requis |
+|------|----------------|
+| **Privacy Policy** | Données collectées, finalités, droits utilisateur, contact DPO |
+| **Terms of Service** | Conditions d'abonnement, annulation, limitations |
+| **Cookie Banner** | Choix accepter/refuser analytics |
